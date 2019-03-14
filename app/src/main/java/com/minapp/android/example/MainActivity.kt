@@ -1,16 +1,20 @@
 package com.minapp.android.example
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.minapp.android.sdk.Baas
+import com.minapp.android.sdk.auth.Auth
+import com.minapp.android.sdk.database.Database
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -20,8 +24,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, Baas.name(), Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            GlobalScope.launch {
+                runCatching { Database.test() }.onFailure { Log.d(TAG, it.message, it) }
+            }
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -80,5 +85,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    companion object {
+        val TAG = "MainActivity"
     }
 }
