@@ -1,6 +1,7 @@
 package com.minapp.android.sdk.file;
 
 import com.minapp.android.sdk.Global;
+import com.minapp.android.sdk.exception.SdkException;
 import com.minapp.android.sdk.file.category.CategoryInfo;
 import com.minapp.android.sdk.file.category.CreateCategoryBody;
 import com.minapp.android.sdk.file.category.UpdateCategoryBody;
@@ -24,6 +25,8 @@ public abstract class Storage {
     static final String PART_AUTHORIZATION = "authorization";
     static final String PART_POLICY = "policy";
     static final String PART_FILE = "file";
+    static final int FILE_CHECKING_MILLIS = 500;
+    public static final int FILE_CHECKING_MAX = 10;
 
     /**
      * 文件上传，分两步：<br />
@@ -31,8 +34,18 @@ public abstract class Storage {
      * 2. 使用上一步获取的授权凭证和上传地址，进行文件上传
      */
     public static CloudFile uploadFile(String filename, byte[] data) throws Exception {
+        return uploadFile(filename, null, data);
+    }
+
+    /**
+     * 文件上传，分两步：<br />
+     * 1. 获取上传文件所需授权凭证和上传地址<br />
+     * 2. 使用上一步获取的授权凭证和上传地址，进行文件上传
+     */
+    public static CloudFile uploadFile(String filename, String categoryId, byte[] data) throws Exception {
         UploadMetaBody body = new UploadMetaBody();
         body.setFileName(filename);
+        body.setCategoryId(categoryId);
         UploadMetaResponse meta = Global.httpApi().getUploadMeta(body).execute().body();
 
         MultipartBody multipartBody = new MultipartBody.Builder()
@@ -41,11 +54,22 @@ public abstract class Storage {
                 .addFormDataPart(PART_POLICY, meta.getPolicy())
                 .addFormDataPart(PART_FILE, filename, RequestBody.create(null, data))
                 .build();
-        Response<UploadResponse> response = Global.httpApi().uploadFile(
-                meta.getUploadUrl(),
-                multipartBody
-        ).execute();
-        return file(meta.getId());
+        Global.httpApi().uploadFile(meta.getUploadUrl(), multipartBody).execute();
+
+        CloudFile uploaded = null;
+        int maxLoop = FILE_CHECKING_MAX;
+        synchronized (meta) {
+            while (maxLoop > 0) {
+                uploaded = file(meta.getId());
+                if (uploaded.isUploadSuccess()) {
+                    return uploaded;
+                } else {
+                    maxLoop--;
+                    meta.wait(FILE_CHECKING_MILLIS);
+                }
+            }
+        }
+        return uploaded;
     }
 
 

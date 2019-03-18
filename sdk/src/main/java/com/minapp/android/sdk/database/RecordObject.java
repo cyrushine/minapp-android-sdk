@@ -3,8 +3,13 @@ package com.minapp.android.sdk.database;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.minapp.android.sdk.Global;
+import com.minapp.android.sdk.file.Category;
+import com.minapp.android.sdk.file.CloudFile;
+import com.minapp.android.sdk.file.model.FileMetaResponse;
 import com.minapp.android.sdk.util.Util;
 
 public class RecordObject {
@@ -26,7 +31,7 @@ public class RecordObject {
         return table != null ? table.getTableId() : -1;
     }
 
-    @Nullable String id() {
+    public @Nullable String id() {
         return meta != null ? meta.getId() : null;
     }
 
@@ -69,8 +74,9 @@ public class RecordObject {
     /*************************** CURD ***********************************/
 
 
-    public void save() throws Exception {
+    public RecordObject save() throws Exception {
         Database.save(this);
+        return this;
     }
 
     public void saveInBackground() {
@@ -124,9 +130,10 @@ public class RecordObject {
 
     /*************************** string ***********************************/
 
-    public void put(@NonNull String key, String value) {
+    public RecordObject put(@NonNull String key, String value) {
         Util.assetNotNull(key);
         jsonObject.addProperty(key, value);
+        return this;
     }
 
     public @Nullable String getString(@NonNull String key) {
@@ -143,9 +150,10 @@ public class RecordObject {
 
 
 
-    public void put(@NonNull String key, Number value) {
+    public RecordObject put(@NonNull String key, Number value) {
         Util.assetNotNull(key);
         jsonObject.addProperty(key, value);
+        return this;
     }
 
 
@@ -162,7 +170,7 @@ public class RecordObject {
     /*************************** array ***********************************/
 
 
-    public void put(@NonNull String key, String[] value) {
+    public RecordObject put(@NonNull String key, String[] value) {
         Util.assetNotNull(key);
         JsonArray array = null;
         if (value != null) {
@@ -172,6 +180,7 @@ public class RecordObject {
             }
         }
         jsonObject.add(key, array);
+        return this;
     }
 
     public void put(@NonNull String key, Number[] value) {
@@ -189,9 +198,10 @@ public class RecordObject {
 
     /*************************** boolean ***********************************/
 
-    public void put(@NonNull String key, boolean value) {
+    public RecordObject put(@NonNull String key, boolean value) {
         Util.assetNotNull(key);
         jsonObject.addProperty(key, value);
+        return this;
     }
 
     public @Nullable Boolean getBoolean(@NonNull String key) {
@@ -204,7 +214,26 @@ public class RecordObject {
     }
 
 
-    /*************************** number ***********************************/
+    /*************************** file ***********************************/
+
+    public RecordObject put(@NonNull String key, CloudFile value) {
+        Util.assetNotNull(key);
+        JsonElement json = null;
+        if (value != null) {
+            json = Global.gson().toJsonTree(new FileMetaResponse(value));
+        }
+        jsonObject.add(key, json);
+        return this;
+    }
+
+    public @Nullable CloudFile getFile(@NonNull String key) {
+        Util.assetNotNull(key);
+        try {
+            return new CloudFile(Global.gson().fromJson(jsonObject.getAsJsonObject(key), FileMetaResponse.class));
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 
     /*************************** number ***********************************/

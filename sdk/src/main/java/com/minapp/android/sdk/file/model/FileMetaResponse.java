@@ -1,6 +1,7 @@
 package com.minapp.android.sdk.file.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.minapp.android.sdk.file.CloudFile;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class FileMetaResponse {
     @SerializedName("cdn_path")
     private String cdnPath;
     @SerializedName("created_at")
-    private long createdAt;
+    private Long createdAt;
     @SerializedName("id")
     private String id;
     @SerializedName("media_type")
@@ -34,11 +35,25 @@ public class FileMetaResponse {
     @SerializedName("path")
     private String path;
     @SerializedName("size")
-    private long size;
+    private Long size;
     @SerializedName("status")
     private String status;
     @SerializedName("categories")
     private List<Category> categories;
+
+    public FileMetaResponse() {}
+
+    public FileMetaResponse(CloudFile file) {
+        this.cdnPath = file.getCdnPath();
+        this.createdAt = file.getCreatedAt();
+        this.id = file.getId();
+        this.mediaType = file.getMediaType();
+        this.mimeType = file.getMimeType();
+        this.name = file.getName();
+        this.path = file.getPath();
+        this.size = file.getSize();
+    }
+
 
     public String getCdnPath() {
         return cdnPath;
@@ -48,11 +63,11 @@ public class FileMetaResponse {
         this.cdnPath = cdnPath;
     }
 
-    public long getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(long createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -96,11 +111,11 @@ public class FileMetaResponse {
         this.path = path;
     }
 
-    public long getSize() {
+    public Long getSize() {
         return size;
     }
 
-    public void setSize(long size) {
+    public void setSize(Long size) {
         this.size = size;
     }
 

@@ -1,7 +1,14 @@
 package com.minapp.android.sdk.file;
 
+import android.support.annotation.NonNull;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.minapp.android.sdk.file.model.FileMetaResponse;
+import com.minapp.android.sdk.util.Util;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +27,8 @@ public class CloudFile {
     private String status;
     private List<Category> categories = new ArrayList<>(5);
 
-    CloudFile(FileMetaResponse meta) {
+    public CloudFile(@NonNull FileMetaResponse meta) {
+        Util.assetNotNull(meta);
         this.cdnPath = meta.getCdnPath();
         this.createdAt = meta.getCreatedAt();
         this.id = meta.getId();

@@ -10,9 +10,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import com.minapp.android.sdk.database.Database
-import com.minapp.android.sdk.database.QueryCallback
-import com.minapp.android.sdk.database.TableObject
+import com.minapp.android.sdk.database.*
 import com.minapp.android.sdk.database.query.Result
 import com.minapp.android.sdk.file.Category
 import com.minapp.android.sdk.file.CloudFile
@@ -73,22 +71,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     GlobalScope.launch {
                         runCatching {
 
-                            val fruits = Storage.createCategory("水果1")
-                            val cars = Storage.createCategory("汽车1")
-                            Log.d(Const.TAG, "create category $fruits, $cars")
-
-                            Log.d(Const.TAG, "find category ${Storage.category(fruits.id)}")
-                            Log.d(Const.TAG, "find category ${Storage.category(cars.id)}")
-
-                            Log.d(Const.TAG, "category list : ${Storage.categories(null, null, null).objects}")
-
-                            val newFruits = Storage.updateCategory(fruits.id, "新水果1")
-                            Log.d(Const.TAG, "update category ${Storage.category(newFruits.id)}")
-
-                            Storage.deleteCategory(newFruits.id)
-                            Storage.deleteCategory(cars.id)
-                            Log.d(Const.TAG, "category list : ${Storage.categories(null, null, null).totalCount}")
-
+                            val file = File(Matisse.obtainPathResult(data)[0])
+                            val uploaded = Storage.uploadFile(file.name, file.readBytes())
+                            val horses = TableObject(66683)
+                            val qrCode = horses.createRecord().put("horse_name", "二维马").put("attachment", uploaded).save()
+                            Log.d(Const.TAG, "${qrCode.getFile("attachment")?.path}")
 
                         }.onFailure { Log.d(Const.TAG, it.message, it) }
                     }
