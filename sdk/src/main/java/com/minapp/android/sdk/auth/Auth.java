@@ -9,6 +9,7 @@ import com.minapp.android.sdk.HttpApi;
 import com.minapp.android.sdk.auth.*;
 import com.minapp.android.sdk.exception.AuthException;
 import com.minapp.android.sdk.exception.HttpException;
+import com.minapp.android.sdk.util.ContentTypeInterceptor;
 import com.minapp.android.sdk.util.MemoryCookieJar;
 import okhttp3.*;
 import retrofit2.Response;
@@ -82,6 +83,7 @@ public abstract class Auth {
                             .writeTimeout(Const.HTTP_TIMEOUT, TimeUnit.MILLISECONDS)
                             .cookieJar(new MemoryCookieJar())
                             .retryOnConnectionFailure(true)
+                            .addNetworkInterceptor(new ContentTypeInterceptor())
                             .build();
 
                     Gson gson = new GsonBuilder()

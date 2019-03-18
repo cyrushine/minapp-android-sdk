@@ -2,9 +2,13 @@ package com.minapp.android.sdk;
 
 import com.google.gson.JsonObject;
 import com.minapp.android.sdk.auth.*;
-import com.minapp.android.sdk.database.query.QueryResponse;
+import com.minapp.android.sdk.file.*;
+import com.minapp.android.sdk.util.PagedListResponse;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.*;
+
+import java.util.Collection;
 
 
 /**
@@ -41,7 +45,6 @@ public interface HttpApi {
      * @return
      */
     @POST("api/oauth2/hydrogen/openapi/authorize/")
-    @Headers("Content-Type: application/json")
     Call<CodeResponse> code(@Body CodeRequest body);
 
 
@@ -51,8 +54,12 @@ public interface HttpApi {
      * @return
      */
     @POST("api/oauth2/access_token/")
-    @Headers("Content-Type: application/json")
     Call<AccessTokenResponse> accessToken(@Body AccessTokenRequest body);
+
+
+
+    /********************************* Record api ****************************************/
+
 
     /**
      * 写入一条记录
@@ -60,7 +67,6 @@ public interface HttpApi {
      * @return
      */
     @POST("oserve/v1/table/{table_id}/record/")
-    @Headers("Content-Type: application/json")
     CheckedCall<JsonObject> saveRecord(
             @Path("table_id") long tableId,
             @Body JsonObject body
@@ -75,7 +81,6 @@ public interface HttpApi {
      * @return
      */
     @PUT("oserve/v1/table/{table_id}/record/{record_id}/")
-    @Headers("Content-Type: application/json")
     CheckedCall<JsonObject> updateRecord(
             @Path("table_id") long tableId,
             @Path("record_id") String recordId,
@@ -113,7 +118,7 @@ public interface HttpApi {
      * @return
      */
     @GET("oserve/v1/table/{table_id}/record/")
-    CheckedCall<QueryResponse> queryRecord(
+    CheckedCall<PagedListResponse<JsonObject>> queryRecord(
             @Path("table_id") long tableId,
             @Query("where") String where,
             @Query("order_by") String orderBy,
@@ -121,4 +126,65 @@ public interface HttpApi {
             @Query("offset") Long offset
     );
 
+
+    /********************************* File api ****************************************/
+
+
+    /**
+     * 上传文件前现获取到上传相关的必要信息
+     * @param body
+     * @return
+     */
+    @POST("oserve/v1/upload/")
+    CheckedCall<UploadMetaResponse> getUploadMeta(@Body UploadMetaRequest body);
+
+    /**
+     * 上传文件
+     * @param url {@link UploadMetaResponse#uploadUrl}
+     * @param body {@link Storage#uploadFile(String, byte[])}
+     */
+    @POST
+    CheckedCall<UploadResponse> uploadFile(
+            @Url String url,
+            @Body RequestBody body
+    );
+
+    /**
+     * 文件信息
+     * @param id
+     * @return
+     */
+    @GET("oserve/v1/file/{file_id}/")
+    CheckedCall<FileMetaResponse> file(@Path("file_id") String id);
+
+
+    /**
+     * 查询文件列表
+     * @param orderBy
+     * @param limit
+     * @param offset
+     * @return
+     */
+    @GET("oserve/v1/file/")
+    CheckedCall<PagedListResponse<FileMetaResponse>> files(
+            @Query("order_by") String orderBy,
+            @Query("limit") Long limit,
+            @Query("offset") Long offset
+    );
+
+    /**
+     * 删除单个文件
+     * @param id
+     * @return
+     */
+    @DELETE("oserve/v1/file/{file_id}/")
+    CheckedCall<Void> deleteFile(@Path("file_id") String id);
+
+    /**
+     * 批量删除文件
+     * @param ids
+     * @return
+     */
+    @DELETE("oserve/v1/file/")
+    CheckedCall<Void> deleteFiles(@Query("id__in") Collection<String> ids);
 }

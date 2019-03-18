@@ -6,6 +6,7 @@ import com.minapp.android.sdk.auth.AuthInterceptor;
 import com.minapp.android.sdk.auth.CheckedCallAdapterFactory;
 import com.minapp.android.sdk.database.query.Condition;
 import com.minapp.android.sdk.database.query.ConditionNode;
+import com.minapp.android.sdk.util.ContentTypeInterceptor;
 import com.minapp.android.sdk.util.MemoryCookieJar;
 import com.minapp.android.sdk.util.PrintInterceptor;
 import okhttp3.OkHttpClient;
@@ -36,7 +37,8 @@ public abstract class Global {
                             .cookieJar(new MemoryCookieJar())
                             .retryOnConnectionFailure(true)
                             .addNetworkInterceptor(new AuthInterceptor())
-                            .addInterceptor(new PrintInterceptor())
+                            .addNetworkInterceptor(new ContentTypeInterceptor())
+                            .addNetworkInterceptor(new PrintInterceptor())
                             .build();
 
                     if (GSON == null) {

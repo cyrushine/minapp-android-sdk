@@ -1,10 +1,9 @@
 package com.minapp.android.sdk.database;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.google.gson.JsonObject;
-import com.minapp.android.sdk.Const;
 import com.minapp.android.sdk.Global;
+import com.minapp.android.sdk.util.PagedListResponse;
 import com.minapp.android.sdk.database.query.*;
 import com.minapp.android.sdk.util.Util;
 import retrofit2.Response;
@@ -13,22 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Database {
-
-    public static void test() throws Exception {
-        TableObject horse = new TableObject(66683);
-        Query query = new Query();
-        query.eq("horse_age", 300);
-        horse.queryInBackground(query, new QueryCallback() {
-            @Override
-            public void onSuccess(Result result) {
-            }
-
-            @Override
-            public void onFailure(TableObject table, Exception e) {
-
-            }
-        });
-    }
 
     /**
      * 新增 or 更新
@@ -92,9 +75,9 @@ public abstract class Database {
             String orderBy = query != null ? query.getOrderBy() : null;
             Long limit = query != null ? query.getLimit() : null;
             Long offset = query != null ? query.getOffset() : null;
-            QueryResponse body = Global.httpApi().queryRecord(table.getTableId(), where, orderBy, limit, offset).execute().body();
+            PagedListResponse<JsonObject> body = Global.httpApi().queryRecord(table.getTableId(), where, orderBy, limit, offset).execute().body();
 
-            QueryResponse.Meta meta = body.getMeta();
+            PagedListResponse.Meta meta = body.getMeta();
             if (meta != null) {
                 result.setNext(meta.getNext());
                 result.setPrevious(meta.getPrevious());

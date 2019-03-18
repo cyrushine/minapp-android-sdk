@@ -26,9 +26,9 @@ public class PrintInterceptor implements Interceptor {
         Request req = resp.request();
         StringBuilder sb = new StringBuilder(" \n");
 
-        sb.append(req.method()).append(" ").append(req.url()).append("\n");
+        sb.append(req.method()).append(" ").append(req.url());
         if (req.headers().size() > 0) {
-            sb.append(req.headers());
+            sb.append("\nheaders\n").append(req.headers());
         }
         if (req.body() != null) {
             Buffer buffer = new Buffer();
@@ -36,7 +36,7 @@ public class PrintInterceptor implements Interceptor {
                 req.body().writeTo(buffer);
                 String body = buffer.readByteString().utf8();
                 if (!TextUtils.isEmpty(body)) {
-                    sb.append("\n").append(body).append("\n");
+                    sb.append("\nbody\n").append(body).append("\n");
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
@@ -45,15 +45,15 @@ public class PrintInterceptor implements Interceptor {
             }
         }
 
-        sb.append("\n").append(resp.code()).append("\n");
+        sb.append("\n").append(resp.code());
         if (resp.headers().size() > 0) {
-            sb.append(resp.headers()).append("\n");
+            sb.append("\nheaders\n").append(resp.headers());
         }
         if (resp.body() != null) {
             try {
                 String str = Util.readString(resp.body().byteStream());
                 if (!TextUtils.isEmpty(str)) {
-                    sb.append("\n").append(str).append("\n");
+                    sb.append("\nbody\n").append(str).append("\n");
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);

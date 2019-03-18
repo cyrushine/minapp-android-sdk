@@ -1,17 +1,16 @@
-package com.minapp.android.sdk.database.query;
+package com.minapp.android.sdk.util;
 
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class QueryResponse {
+public class PagedListResponse<T> {
 
     @SerializedName("meta")
     private Meta meta;
 
     @SerializedName("objects")
-    private List<JsonObject> objects;
+    private List<T> objects;
 
     public Meta getMeta() {
         return meta;
@@ -21,11 +20,11 @@ public class QueryResponse {
         this.meta = meta;
     }
 
-    public List<JsonObject> getObjects() {
+    public List<T> getObjects() {
         return objects;
     }
 
-    public void setObjects(List<JsonObject> objects) {
+    public void setObjects(List<T> objects) {
         this.objects = objects;
     }
 

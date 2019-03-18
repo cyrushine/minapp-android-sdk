@@ -97,7 +97,10 @@ public class CheckedCallAdapterFactory extends CallAdapter.Factory {
 
             if (checked) {
                 if (!response.isSuccessful()) {
-                    throw new HttpException(response.code());
+                    throw new HttpException(
+                            response.code(),
+                            response.errorBody() != null ? response.errorBody().string() : null
+                    );
                 }
                 if (hasBody && response.body() == null) {
                     throw new EmptyResponseException();
