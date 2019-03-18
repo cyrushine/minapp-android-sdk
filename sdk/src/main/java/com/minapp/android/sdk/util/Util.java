@@ -6,13 +6,28 @@ import android.text.TextUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static okhttp3.internal.Util.verifyAsIpAddress;
 
 public abstract class Util {
+
+    public static <R, T> PagedListResponse<R> transform(PagedListResponse<T> response, Function<T, R> func) {
+        PagedListResponse<R> data = new PagedListResponse<>();
+        data.setMeta(response.getMeta());
+        List<T> objects = response.getObjects();
+        if (objects != null && func != null) {
+            data.setObjects(new ArrayList<R>(objects.size()));
+            for (T item : objects) {
+                data.getObjects().add(func.on(item));
+            }
+        }
+        return data;
+    }
 
     public static @Nullable String readString(InputStream input) {
         return readString(input, "utf-8");

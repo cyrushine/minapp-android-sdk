@@ -1,8 +1,8 @@
-package com.minapp.android.sdk.file;
+package com.minapp.android.sdk.file.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class UploadMetaRequest {
+public class UploadMetaBody {
 
     @SerializedName("filename")
     private String fileName;            // 上传的文件名

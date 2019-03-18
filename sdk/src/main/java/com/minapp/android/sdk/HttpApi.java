@@ -3,6 +3,14 @@ package com.minapp.android.sdk;
 import com.google.gson.JsonObject;
 import com.minapp.android.sdk.auth.*;
 import com.minapp.android.sdk.file.*;
+import com.minapp.android.sdk.file.category.CategoryInfo;
+import com.minapp.android.sdk.file.category.CreateCategoryBody;
+import com.minapp.android.sdk.file.category.UpdateCategoryBody;
+import com.minapp.android.sdk.file.model.FileMetaResponse;
+import com.minapp.android.sdk.file.model.UploadMetaBody;
+import com.minapp.android.sdk.file.model.UploadMetaResponse;
+import com.minapp.android.sdk.file.model.UploadResponse;
+import com.minapp.android.sdk.util.PagedList;
 import com.minapp.android.sdk.util.PagedListResponse;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -136,7 +144,7 @@ public interface HttpApi {
      * @return
      */
     @POST("oserve/v1/upload/")
-    CheckedCall<UploadMetaResponse> getUploadMeta(@Body UploadMetaRequest body);
+    CheckedCall<UploadMetaResponse> getUploadMeta(@Body UploadMetaBody body);
 
     /**
      * 上传文件
@@ -187,4 +195,58 @@ public interface HttpApi {
      */
     @DELETE("oserve/v1/file/")
     CheckedCall<Void> deleteFiles(@Query("id__in") Collection<String> ids);
+
+
+    /********************************* Category api ****************************************/
+
+
+    /**
+     * 创建分类
+     * @param body
+     * @return
+     */
+    @POST("oserve/v1/file-category/")
+    CheckedCall<CategoryInfo> createCategory(@Body CreateCategoryBody body);
+
+    /**
+     * 获取分类信息
+     * @param id
+     * @return
+     */
+    @GET("oserve/v1/file-category/{category_id}/")
+    CheckedCall<CategoryInfo> category(@Path("category_id") String id);
+
+    /**
+     * 分类列表
+     * @param orderBy
+     * @param limit
+     * @param offset
+     * @return
+     */
+    @GET("oserve/v1/file-category/")
+    CheckedCall<PagedListResponse<CategoryInfo>> categories(
+            @Query("order_by") String orderBy,
+            @Query("limit") Long limit,
+            @Query("offset") Long offset
+    );
+
+    /**
+     * 修改分类
+     * @param body
+     * @return
+     */
+    @PUT("oserve/v1/file-category/{category_id}/")
+    CheckedCall<CategoryInfo> updateCategory(
+            @Path("category_id") String id,
+            @Body UpdateCategoryBody body
+    );
+
+    /**
+     * 删除分类
+     * @param id
+     * @return
+     */
+    @DELETE("oserve/v1/file-category/{category_id}/")
+    CheckedCall<Void> deleteCategory(@Path("category_id") String id);
+
 }

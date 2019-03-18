@@ -14,6 +14,7 @@ import com.minapp.android.sdk.database.Database
 import com.minapp.android.sdk.database.QueryCallback
 import com.minapp.android.sdk.database.TableObject
 import com.minapp.android.sdk.database.query.Result
+import com.minapp.android.sdk.file.Category
 import com.minapp.android.sdk.file.CloudFile
 import com.minapp.android.sdk.file.Storage
 import com.zhihu.matisse.Matisse
@@ -71,22 +72,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (resultCode == RESULT_OK) {
                     GlobalScope.launch {
                         runCatching {
-                            val file = File(Matisse.obtainPathResult(data)[0])
-                            val uploaded = Storage.uploadFile(file.name, file.readBytes())
-                            Log.d(Const.TAG, "upload success : ${uploaded.id}")
 
-                            val data = Storage.file(uploaded.id);
-                            Log.d(Const.TAG, "file ${data.id} upload success : ${data.isUploadSuccess}")
+                            val fruits = Storage.createCategory("水果1")
+                            val cars = Storage.createCategory("汽车1")
+                            Log.d(Const.TAG, "create category $fruits, $cars")
 
-                            Storage.deleteFiles(listOf(data.id));
-                            Log.d(Const.TAG, "delete file ${data.id} success")
+                            Log.d(Const.TAG, "find category ${Storage.category(fruits.id)}")
+                            Log.d(Const.TAG, "find category ${Storage.category(cars.id)}")
 
-                            val page = Storage.files(null, 1000, null);
-                            Log.d(Const.TAG, "uploaded ${page.totalCount}")
+                            Log.d(Const.TAG, "category list : ${Storage.categories(null, null, null).objects}")
 
-                            Storage.deleteFiles(page.objects.map { it.id })
-                            Log.d(Const.TAG, "delete all files success")
-                            Log.d(Const.TAG, "file size ${Storage.files(null, null, null).totalCount}")
+                            val newFruits = Storage.updateCategory(fruits.id, "新水果1")
+                            Log.d(Const.TAG, "update category ${Storage.category(newFruits.id)}")
+
+                            Storage.deleteCategory(newFruits.id)
+                            Storage.deleteCategory(cars.id)
+                            Log.d(Const.TAG, "category list : ${Storage.categories(null, null, null).totalCount}")
 
 
                         }.onFailure { Log.d(Const.TAG, it.message, it) }

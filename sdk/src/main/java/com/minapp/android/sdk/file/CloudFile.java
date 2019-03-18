@@ -1,6 +1,6 @@
 package com.minapp.android.sdk.file;
 
-import com.google.gson.annotations.SerializedName;
+import com.minapp.android.sdk.file.model.FileMetaResponse;
 
 import java.util.ArrayList;
 import java.util.List;

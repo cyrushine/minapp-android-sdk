@@ -1,14 +1,22 @@
 package com.minapp.android.sdk.file;
 
 import com.minapp.android.sdk.Global;
+import com.minapp.android.sdk.file.category.CategoryInfo;
+import com.minapp.android.sdk.file.category.CreateCategoryBody;
+import com.minapp.android.sdk.file.category.UpdateCategoryBody;
+import com.minapp.android.sdk.file.model.FileMetaResponse;
+import com.minapp.android.sdk.file.model.UploadMetaBody;
+import com.minapp.android.sdk.file.model.UploadMetaResponse;
+import com.minapp.android.sdk.file.model.UploadResponse;
+import com.minapp.android.sdk.util.Function;
 import com.minapp.android.sdk.util.PagedList;
 import com.minapp.android.sdk.util.PagedListResponse;
+import com.minapp.android.sdk.util.Util;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Response;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class Storage {
@@ -23,7 +31,7 @@ public abstract class Storage {
      * 2. 使用上一步获取的授权凭证和上传地址，进行文件上传
      */
     public static CloudFile uploadFile(String filename, byte[] data) throws Exception {
-        UploadMetaRequest body = new UploadMetaRequest();
+        UploadMetaBody body = new UploadMetaBody();
         body.setFileName(filename);
         UploadMetaResponse meta = Global.httpApi().getUploadMeta(body).execute().body();
 
@@ -62,16 +70,12 @@ public abstract class Storage {
      */
     public static PagedList<CloudFile> files(String orderBy, Long limit, Long offset) throws Exception {
         PagedListResponse<FileMetaResponse> list = Global.httpApi().files(orderBy, limit, offset).execute().body();
-        PagedListResponse<CloudFile> files = new PagedListResponse();
-        files.setMeta(list.getMeta());
-        if (list.getObjects() != null) {
-            List<CloudFile> objects = new ArrayList<>(list.getObjects().size());
-            for (FileMetaResponse item : list.getObjects()) {
-                objects.add(new CloudFile(item));
+        return new PagedList<>(Util.transform(list, new Function<FileMetaResponse, CloudFile>() {
+            @Override
+            public CloudFile on(FileMetaResponse meta) {
+                return new CloudFile(meta);
             }
-            files.setObjects(objects);
-        }
-        return new PagedList<>(files);
+        }));
     }
 
     /**
@@ -90,4 +94,64 @@ public abstract class Storage {
             Global.httpApi().deleteFiles(ids).execute();
         }
     }
+
+
+    /**
+     * 创建分类
+     * @param name
+     * @return
+     * @throws Exception
+     */
+    public static Category createCategory(String name) throws Exception {
+        return new Category(Global.httpApi().createCategory(new CreateCategoryBody(name)).execute().body());
+    }
+
+    /**
+     * 获取分类
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    public static Category category(String id) throws Exception {
+        return new Category(Global.httpApi().category(id).execute().body());
+    }
+
+    /**
+     * 列表查询分类
+     * @param orderBy
+     * @param limit
+     * @param offset
+     * @return
+     * @throws Exception
+     */
+    public static PagedList<Category> categories(String orderBy, Long limit, Long offset) throws Exception {
+        PagedListResponse<CategoryInfo> list = Global.httpApi().categories(orderBy, limit, offset).execute().body();
+        return new PagedList<Category>(Util.transform(list, new Function<CategoryInfo, Category>() {
+            @Override
+            public Category on(CategoryInfo info) {
+                return new Category(info);
+            }
+        }));
+    }
+
+    /**
+     * 更新分类
+     * @param id
+     * @param name
+     * @return
+     * @throws Exception
+     */
+    public static Category updateCategory(String id, String name) throws Exception {
+        return new Category(Global.httpApi().updateCategory(id, new UpdateCategoryBody(name)).execute().body());
+    }
+
+    /**
+     * 删除分类
+     * @param id
+     * @throws Exception
+     */
+    public static void deleteCategory(String id) throws Exception {
+        Global.httpApi().deleteCategory(id).execute();
+    }
+
 }
