@@ -1,4 +1,4 @@
-package com.minapp.android.example
+package com.minapp.android.example.util
 
 import android.app.Activity
 import android.content.Context

@@ -2,15 +2,14 @@ package com.minapp.android.sdk.database;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.minapp.android.sdk.Global;
 import com.minapp.android.sdk.file.Category;
 import com.minapp.android.sdk.file.CloudFile;
 import com.minapp.android.sdk.file.model.FileMetaResponse;
 import com.minapp.android.sdk.util.Util;
+
+import java.lang.reflect.Type;
 
 public class RecordObject {
 
@@ -236,8 +235,33 @@ public class RecordObject {
     }
 
 
-    /*************************** number ***********************************/
+    /*************************** object ***********************************/
 
+    /**
+     * 这里通过 {@link Gson} 序列化 object <br />
+     * 所以 object 要不用 gson 注解标注 property，要不在 proguard 里排除 object 的混淆
+     * @param key
+     * @param obj
+     * @return
+     */
+    public RecordObject put(@NonNull String key, Object obj) {
+        Util.assetNotNull(key);
+        if (obj == null) {
+            jsonObject.add(key, null);
+        } else {
+            jsonObject.add(key, Global.gson().toJsonTree(obj));
+        }
+        return this;
+    }
+
+    public <T> T get(@NonNull String key, Class<T> clz) {
+        Util.assetNotNull(key);
+        try {
+            return Global.gson().fromJson(jsonObject.get(key), clz);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     /*************************** number ***********************************/
 

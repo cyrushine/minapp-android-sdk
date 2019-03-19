@@ -10,10 +10,10 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.minapp.android.example.model.SimpleModel
+import com.minapp.android.example.util.Glide4Engine
+import com.minapp.android.example.util.Util
 import com.minapp.android.sdk.database.*
-import com.minapp.android.sdk.database.query.Result
-import com.minapp.android.sdk.file.Category
-import com.minapp.android.sdk.file.CloudFile
 import com.minapp.android.sdk.file.Storage
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
@@ -23,7 +23,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.Exception
-import java.nio.file.Files
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -33,10 +32,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            if (Util.checkPermission(this, IMAGE_PICKER_PERMISSIONS))
+            /*if (Util.checkPermission(this, IMAGE_PICKER_PERMISSIONS))
                 openImagePicker()
             else
-                Util.requestPermission(this, OPEN_IMAGE_PICKER, IMAGE_PICKER_PERMISSIONS)
+                Util.requestPermission(this, OPEN_IMAGE_PICKER, IMAGE_PICKER_PERMISSIONS)*/
+
+            GlobalScope.launch { runCatching {
+                val table = TableObject(66683)
+                val obj = SimpleModel(0, "simple model", 0, false)
+                val record = table.createRecord().put("meta_obj", obj).put("horse_name", "二维马").save()
+                val persistence = table.fetchRecord(record.id())
+                val persistentObj = persistence.get("meta_obj", SimpleModel::class.java)
+                Log.d(Const.TAG, persistentObj.name)
+            }.onFailure { Log.e(Const.TAG, it.message, it) } }
         }
 
         val toggle = ActionBarDrawerToggle(
