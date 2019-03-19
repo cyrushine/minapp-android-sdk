@@ -25,7 +25,7 @@ public abstract class DateUtil {
      * @return
      */
     public static @Nullable Calendar parseDBDateString(String str) {
-        return parseDBDateStringBySDF(str);
+        return parseDBDateStringByRegExp(str);
     }
 
     /**

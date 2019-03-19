@@ -6,14 +6,13 @@ import android.util.Log;
 import com.google.gson.*;
 import com.minapp.android.sdk.Const;
 import com.minapp.android.sdk.Global;
-import com.minapp.android.sdk.file.Category;
 import com.minapp.android.sdk.file.CloudFile;
-import com.minapp.android.sdk.file.model.FileMetaResponse;
-import com.minapp.android.sdk.util.DateUtil;
+import com.minapp.android.sdk.util.Function;
 import com.minapp.android.sdk.util.Util;
 
-import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class RecordObject {
 
@@ -169,33 +168,36 @@ public class RecordObject {
         }
     }
 
-
-    /*************************** array ***********************************/
-
-
-    public RecordObject put(@NonNull String key, String[] value) {
-        Util.assetNotNull(key);
-        JsonArray array = null;
-        if (value != null) {
-            array = new JsonArray(value.length);
-            for (String item : value) {
-                array.add(item);
-            }
+    public @Nullable Integer getInt(@NonNull String key) {
+        try {
+            return getNumber(key).intValue();
+        } catch (Exception e) {
+            return null;
         }
-        jsonObject.add(key, array);
-        return this;
     }
 
-    public void put(@NonNull String key, Number[] value) {
-        Util.assetNotNull(key);
-        JsonArray array = null;
-        if (value != null) {
-            array = new JsonArray(value.length);
-            for (Number item : value) {
-                array.add(item);
-            }
+    public @Nullable Long getLong(@NonNull String key) {
+        try {
+            return getNumber(key).longValue();
+        } catch (Exception e) {
+            return null;
         }
-        jsonObject.add(key, array);
+    }
+
+    public @Nullable Float getFloat(@NonNull String key) {
+        try {
+            return getNumber(key).floatValue();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public @Nullable Double getDouble(@NonNull String key) {
+        try {
+            return getNumber(key).doubleValue();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
@@ -221,18 +223,14 @@ public class RecordObject {
 
     public RecordObject put(@NonNull String key, CloudFile value) {
         Util.assetNotNull(key);
-        JsonElement json = null;
-        if (value != null) {
-            json = Global.gson().toJsonTree(new FileMetaResponse(value));
-        }
-        jsonObject.add(key, json);
+        jsonObject.add(key, Global.gson().toJsonTree(value));
         return this;
     }
 
     public @Nullable CloudFile getFile(@NonNull String key) {
         Util.assetNotNull(key);
         try {
-            return new CloudFile(Global.gson().fromJson(jsonObject.getAsJsonObject(key), FileMetaResponse.class));
+            return Global.gson().fromJson(jsonObject.getAsJsonObject(key), CloudFile.class);
         } catch (Exception e) {
             return null;
         }
@@ -250,11 +248,7 @@ public class RecordObject {
      */
     public RecordObject put(@NonNull String key, Object obj) {
         Util.assetNotNull(key);
-        if (obj == null) {
-            jsonObject.add(key, null);
-        } else {
-            jsonObject.add(key, Global.gson().toJsonTree(obj));
-        }
+        jsonObject.add(key, Global.gson().toJsonTree(obj));
         return this;
     }
 
@@ -267,18 +261,19 @@ public class RecordObject {
         }
     }
 
+
     /*************************** date（日期时间，ISO8601 格式的日期字符串，例如："2018-09-01T18:31:02.631000+08:00" ***********************************/
 
     public RecordObject put(@NonNull String key, Calendar calendar) {
         Util.assetNotNull(key);
-        jsonObject.addProperty(key, DateUtil.formatDBDateString(calendar));
+        jsonObject.add(key, Global.gson().toJsonTree(calendar));
         return this;
     }
 
     public @Nullable Calendar getCalendar(@NonNull String key) {
         Util.assetNotNull(key);
         try {
-            return DateUtil.parseDBDateString(jsonObject.get(key).getAsString());
+            return Global.gson().fromJson(jsonObject.get(key), Calendar.class);
         } catch (Exception e) {
             Log.e(Const.TAG, e.getMessage(), e);
             return null;
@@ -286,7 +281,140 @@ public class RecordObject {
     }
 
 
-    /*************************** number ***********************************/
+    /*************************** array ***********************************/
 
+
+    private  <T> RecordObject putArray(@NonNull String key, List<T> list) {
+        Util.assetNotNull(key);
+        JsonArray value = null;
+        if (list != null) {
+            value = new JsonArray(list.size());
+            for (T item : list) {
+                value.add(Global.gson().toJsonTree(item));
+            }
+        }
+        jsonObject.add(key, value);
+        return this;
+    }
+
+    private @Nullable <T> List<T> getArray(@NonNull String key, Function<JsonElement, T> transform) {
+        Util.assetNotNull(key);
+        try {
+            JsonArray array = jsonObject.get(key).getAsJsonArray();
+            List<T> list = new ArrayList<>(array.size());
+            for (JsonElement elem : array) {
+                list.add(transform.on(elem));
+            }
+            return list;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    public RecordObject putStringArray(@NonNull String key, List<String> list) {
+        return putArray(key, list);
+    }
+
+    public RecordObject putNumberArray(@NonNull String key, List<Number> list) {
+        return putArray(key, list);
+    }
+
+    public RecordObject putBooleanArray(@NonNull String key, List<Boolean> list) {
+        return putArray(key, list);
+    }
+
+    public RecordObject putFileArray(@NonNull String key, List<CloudFile> list) {
+        return putArray(key, list);
+    }
+
+    public RecordObject putCalendarArray(@NonNull String key, List<Calendar> list) {
+        return putArray(key, list);
+    }
+
+    public RecordObject putObjectArray(@NonNull String key, List<Object> list) {
+        return putArray(key, list);
+    }
+
+    public @Nullable List<String> getStringArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, String>() {
+            @Override
+            public String on(JsonElement elem) {
+                return elem.getAsString();
+            }
+        });
+    }
+
+    public @Nullable List<Integer> getIntArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, Integer>() {
+            @Override
+            public Integer on(JsonElement elem) {
+                return elem.getAsNumber().intValue();
+            }
+        });
+    }
+
+    public @Nullable List<Long> getLongArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, Long>() {
+            @Override
+            public Long on(JsonElement elem) {
+                return elem.getAsNumber().longValue();
+            }
+        });
+    }
+
+    public @Nullable List<Float> getFloatArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, Float>() {
+            @Override
+            public Float on(JsonElement elem) {
+                return elem.getAsNumber().floatValue();
+            }
+        });
+    }
+
+    public @Nullable List<Double> getDoubleArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, Double>() {
+            @Override
+            public Double on(JsonElement elem) {
+                return elem.getAsNumber().doubleValue();
+            }
+        });
+    }
+
+    public @Nullable List<Boolean> getBooleanArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, Boolean>() {
+            @Override
+            public Boolean on(JsonElement elem) {
+                return elem.getAsBoolean();
+            }
+        });
+    }
+
+    public @Nullable List<CloudFile> getFileArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, CloudFile>() {
+            @Override
+            public CloudFile on(JsonElement elem) {
+                return Global.gson().fromJson(elem, CloudFile.class);
+            }
+        });
+    }
+
+    public @Nullable List<Calendar> getCalendarArray(@NonNull String key) {
+        return getArray(key, new Function<JsonElement, Calendar>() {
+            @Override
+            public Calendar on(JsonElement elem) {
+                return Global.gson().fromJson(elem, Calendar.class);
+            }
+        });
+    }
+
+    public @Nullable <T> List<T> getObjectArray(@NonNull String key, final Class<T> clz) {
+        return getArray(key, new Function<JsonElement, T>() {
+            @Override
+            public T on(JsonElement elem) {
+                return Global.gson().fromJson(elem, clz);
+            }
+        });
+    }
 }
 

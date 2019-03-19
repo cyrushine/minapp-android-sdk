@@ -40,13 +40,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Util.requestPermission(this, OPEN_IMAGE_PICKER, IMAGE_PICKER_PERMISSIONS)*/
 
             GlobalScope.launch { runCatching {
+
                 val table = TableObject(66683)
-                val birthDate = Calendar.getInstance().apply {
-                    set(1998, 4, 29, 20, 30, 54)
-                }
-                val record = table.createRecord().put("horse_name", "马丽妃").put("birth_date", birthDate).save()
-                table.fetchRecord(record.id()).let { DateUtil.formatDBDateString(it.getCalendar("birth_date")) }.also {
-                    Log.d(Const.TAG, it)
+                val record = table.createRecord()
+                    .put("horse_name", "扫马")
+                    .putStringArray("children", listOf("一", "二", "三", "四", "五", "六", "七"))
+                    .save()
+                table.fetchRecord(record.id()).let { it.getStringArray("children") }.also {
+                    Log.d(Const.TAG, it?.toString())
                 }
                 null
             }.onFailure { Log.e(Const.TAG, it.message, it) } }
