@@ -2,14 +2,18 @@ package com.minapp.android.sdk.database;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import com.google.gson.*;
+import com.minapp.android.sdk.Const;
 import com.minapp.android.sdk.Global;
 import com.minapp.android.sdk.file.Category;
 import com.minapp.android.sdk.file.CloudFile;
 import com.minapp.android.sdk.file.model.FileMetaResponse;
+import com.minapp.android.sdk.util.DateUtil;
 import com.minapp.android.sdk.util.Util;
 
 import java.lang.reflect.Type;
+import java.util.Calendar;
 
 public class RecordObject {
 
@@ -263,7 +267,23 @@ public class RecordObject {
         }
     }
 
-    /*************************** number ***********************************/
+    /*************************** date（日期时间，ISO8601 格式的日期字符串，例如："2018-09-01T18:31:02.631000+08:00" ***********************************/
+
+    public RecordObject put(@NonNull String key, Calendar calendar) {
+        Util.assetNotNull(key);
+        jsonObject.addProperty(key, DateUtil.formatDBDateString(calendar));
+        return this;
+    }
+
+    public @Nullable Calendar getCalendar(@NonNull String key) {
+        Util.assetNotNull(key);
+        try {
+            return DateUtil.parseDBDateString(jsonObject.get(key).getAsString());
+        } catch (Exception e) {
+            Log.e(Const.TAG, e.getMessage(), e);
+            return null;
+        }
+    }
 
 
     /*************************** number ***********************************/

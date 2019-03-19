@@ -15,6 +15,7 @@ import com.minapp.android.example.util.Glide4Engine
 import com.minapp.android.example.util.Util
 import com.minapp.android.sdk.database.*
 import com.minapp.android.sdk.file.Storage
+import com.minapp.android.sdk.util.DateUtil
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import kotlinx.android.synthetic.main.activity_main.*
@@ -23,6 +24,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.Exception
+import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -39,11 +41,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             GlobalScope.launch { runCatching {
                 val table = TableObject(66683)
-                val obj = SimpleModel(0, "simple model", 0, false)
-                val record = table.createRecord().put("meta_obj", obj).put("horse_name", "二维马").save()
-                val persistence = table.fetchRecord(record.id())
-                val persistentObj = persistence.get("meta_obj", SimpleModel::class.java)
-                Log.d(Const.TAG, persistentObj.name)
+                val birthDate = Calendar.getInstance().apply {
+                    set(1998, 4, 29, 20, 30, 54)
+                }
+                val record = table.createRecord().put("horse_name", "马丽妃").put("birth_date", birthDate).save()
+                table.fetchRecord(record.id()).let { DateUtil.formatDBDateString(it.getCalendar("birth_date")) }.also {
+                    Log.d(Const.TAG, it)
+                }
+                null
             }.onFailure { Log.e(Const.TAG, it.message, it) } }
         }
 
