@@ -2,17 +2,21 @@ package com.minapp.android.sdk;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.minapp.android.sdk.auth.AuthInterceptor;
 import com.minapp.android.sdk.auth.CheckedCallAdapterFactory;
 import com.minapp.android.sdk.database.query.Condition;
 import com.minapp.android.sdk.database.query.ConditionNode;
-import com.minapp.android.sdk.util.ContentTypeInterceptor;
-import com.minapp.android.sdk.util.MemoryCookieJar;
-import com.minapp.android.sdk.util.PrintInterceptor;
+import com.minapp.android.sdk.file.CloudFile;
+import com.minapp.android.sdk.serializer.*;
+import com.minapp.android.sdk.util.*;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -90,6 +94,12 @@ public abstract class Global {
                 .setLenient()
                 .registerTypeAdapter(Condition.class, new Condition.Serializer())
                 .registerTypeAdapter(ConditionNode.class, new ConditionNode.Serializer())
+                .registerTypeAdapter(Calendar.class, new CalendarSerializer())
+                .registerTypeAdapter(Calendar.class, new CalendarDeserializer())
+                .registerTypeAdapter(GregorianCalendar.class, new GregorianCalendarSerializer())
+                .registerTypeAdapter(GregorianCalendar.class, new GregorianCalendarDeserializer())
+                .registerTypeAdapter(CloudFile.class, new CloudFileSerializer())
+                .registerTypeAdapter(CloudFile.class, new CloudFileDeserializer())
                 .create();
     }
 

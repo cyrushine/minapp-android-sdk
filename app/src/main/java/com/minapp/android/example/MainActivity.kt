@@ -15,6 +15,7 @@ import com.minapp.android.example.util.Glide4Engine
 import com.minapp.android.example.util.Util
 import com.minapp.android.sdk.database.*
 import com.minapp.android.sdk.file.Storage
+import com.minapp.android.sdk.util.DateUtil
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import kotlinx.android.synthetic.main.activity_main.*
@@ -23,6 +24,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.Exception
+import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -38,12 +40,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Util.requestPermission(this, OPEN_IMAGE_PICKER, IMAGE_PICKER_PERMISSIONS)*/
 
             GlobalScope.launch { runCatching {
+
                 val table = TableObject(66683)
-                val obj = SimpleModel(0, "simple model", 0, false)
-                val record = table.createRecord().put("meta_obj", obj).put("horse_name", "二维马").save()
-                val persistence = table.fetchRecord(record.id())
-                val persistentObj = persistence.get("meta_obj", SimpleModel::class.java)
-                Log.d(Const.TAG, persistentObj.name)
+                val record = table.createRecord()
+                    .put("horse_name", "扫马")
+                    .putStringArray("children", listOf("一", "二", "三", "四", "五", "六", "七"))
+                    .save()
+                table.fetchRecord(record.id()).let { it.getStringArray("children") }.also {
+                    Log.d(Const.TAG, it?.toString())
+                }
+                null
             }.onFailure { Log.e(Const.TAG, it.message, it) } }
         }
 
