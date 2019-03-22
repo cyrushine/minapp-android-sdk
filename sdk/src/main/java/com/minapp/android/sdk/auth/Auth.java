@@ -5,8 +5,11 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.minapp.android.sdk.Const;
+import com.minapp.android.sdk.Global;
 import com.minapp.android.sdk.HttpApi;
-import com.minapp.android.sdk.auth.*;
+import com.minapp.android.sdk.auth.model.SignUpInByEmailReq;
+import com.minapp.android.sdk.auth.model.SignUpInByUsernameReq;
+import com.minapp.android.sdk.auth.model.SignUpInResp;
 import com.minapp.android.sdk.exception.AuthException;
 import com.minapp.android.sdk.exception.HttpException;
 import com.minapp.android.sdk.util.ContentTypeInterceptor;
@@ -16,59 +19,85 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Auth {
 
     private static String CLIENT_ID;
-    private static String CLIENT_SECRET;
     private static final MemoryCookieJar COOKIE_JAR = new MemoryCookieJar();
     private static HttpApi API;
     private static final Object API_LOCK = new Object();
-    private static AccessTokenResponse AUTH_INFO;
+    private static SignUpInResp AUTH_INFO;
 
 
-    public static void init(String clientId, String clientSecret) {
+    public static void init(String clientId) {
         CLIENT_ID = clientId;
-        CLIENT_SECRET = clientSecret;
     }
 
     /**
-     * 进行登录认证，得到 access token
-     * @throws AuthException
+     * 邮箱注册
+     * @param email
+     * @param pwd
+     * @return
+     * @throws Exception
      */
-    static void auth() throws AuthException {
-        try {
-            HttpApi api = httpApi();
+    public static SignUpInResp signUpByEmail(String email, String pwd) throws Exception {
+        return Global.httpApi().signUpByEmail(new SignUpInByEmailReq(email, pwd)).execute().body();
+    }
 
-            Response<CodeResponse> codeResp = api.code(new CodeRequest(CLIENT_ID, CLIENT_SECRET)).execute();
-            if (!codeResp.isSuccessful()) {
-                throw new HttpException(codeResp.code());
-            }
-            CodeResponse code = codeResp.body();
-            if (code == null || TextUtils.isEmpty(code.getCode())) {
-                throw new Exception("code is empty");
-            }
+    /**
+     * 用户名注册
+     * @param username
+     * @param pwd
+     * @return
+     * @throws Exception
+     */
+    public static SignUpInResp signUpByUsername(String username, String pwd) throws Exception {
+        return Global.httpApi().signUpByUsername(new SignUpInByUsernameReq(username, pwd)).execute().body();
+    }
 
-            Response<AccessTokenResponse> tokenResp = api.accessToken(new AccessTokenRequest(CLIENT_ID, CLIENT_SECRET, code.getCode())).execute();
-            if (!tokenResp.isSuccessful()) {
-                throw new HttpException(tokenResp.code());
-            }
-            AccessTokenResponse token = tokenResp.body();
-            if (token == null || TextUtils.isEmpty(token.getAccessToken())) {
-                throw new Exception("access token is empty");
-            }
-            AUTH_INFO = token;
-        } catch (Exception e) {
-            throw new AuthException(e);
-        } finally {
-            COOKIE_JAR.clear();
+    /**
+     * 邮箱登录
+     * @param email
+     * @param pwd
+     * @return
+     * @throws Exception
+     */
+    public static SignUpInResp signInByEmail(String email, String pwd) throws Exception {
+        SignUpInResp info = Global.httpApi().signInByEmail(new SignUpInByEmailReq(email, pwd)).execute().body();
+        signIn(info);
+        return info;
+    }
+
+    /**
+     * 用户名登录
+     * @param username
+     * @param pwd
+     * @return
+     * @throws Exception
+     */
+    public static SignUpInResp signInByUsername(String username, String pwd) throws Exception {
+        SignUpInResp info = Global.httpApi().signInByUsername(new SignUpInByUsernameReq(username, pwd)).execute().body();
+        signIn(info);
+        return info;
+    }
+
+    /**
+     * 登录成功后，保存用户信息
+     * @param info
+     */
+    private static void signIn(SignUpInResp info) {
+        if (info != null) {
+            AUTH_INFO = Global.gson().fromJson(Global.gson().toJson(info), SignUpInResp.class);
         }
     }
 
-    static @Nullable String accessToken() {
-        return AUTH_INFO != null ? AUTH_INFO.getAccessToken() : null;
+    static @Nullable String clientId() {
+        return CLIENT_ID;
+    }
+
+    static @Nullable String token() {
+        return AUTH_INFO != null ? AUTH_INFO.getToken() : null;
     }
 
     private static HttpApi httpApi() {

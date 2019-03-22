@@ -26,6 +26,7 @@ public abstract class Global {
 
     private static HttpApi HTTP_API;
     private static Gson GSON;
+    private static Gson GSON_PRINT;
     private static ExecutorService EXECUTOR_SERVICE;
 
     public static HttpApi httpApi() {
@@ -46,7 +47,7 @@ public abstract class Global {
                             .build();
 
                     if (GSON == null) {
-                        GSON = createGson();
+                        gson();
                     }
 
                     Retrofit retrofit = new Retrofit.Builder()
@@ -67,11 +68,24 @@ public abstract class Global {
         if (GSON == null) {
             synchronized (Global.class) {
                 if (GSON == null) {
-                    GSON = createGson();
+                    GSON = createGson()
+                            .setPrettyPrinting()
+                            .create();
                 }
             }
         }
         return GSON;
+    }
+
+    public static Gson gsonPrint() {
+        if (GSON_PRINT == null) {
+            synchronized (Global.class) {
+                if (GSON_PRINT == null) {
+                    GSON_PRINT = createGson().create();
+                }
+            }
+        }
+        return GSON_PRINT;
     }
 
     public static Future<?> submit(Runnable task) {
@@ -89,7 +103,7 @@ public abstract class Global {
         return EXECUTOR_SERVICE;
     }
 
-    private static Gson createGson() {
+    private static GsonBuilder createGson() {
         return new GsonBuilder()
                 .setLenient()
                 .registerTypeAdapter(Condition.class, new Condition.Serializer())
@@ -99,8 +113,7 @@ public abstract class Global {
                 .registerTypeAdapter(GregorianCalendar.class, new GregorianCalendarSerializer())
                 .registerTypeAdapter(GregorianCalendar.class, new GregorianCalendarDeserializer())
                 .registerTypeAdapter(CloudFile.class, new CloudFileSerializer())
-                .registerTypeAdapter(CloudFile.class, new CloudFileDeserializer())
-                .create();
+                .registerTypeAdapter(CloudFile.class, new CloudFileDeserializer());
     }
 
 }

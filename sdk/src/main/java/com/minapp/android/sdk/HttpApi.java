@@ -2,6 +2,9 @@ package com.minapp.android.sdk;
 
 import com.google.gson.JsonObject;
 import com.minapp.android.sdk.auth.*;
+import com.minapp.android.sdk.auth.model.SignUpInByEmailReq;
+import com.minapp.android.sdk.auth.model.SignUpInByUsernameReq;
+import com.minapp.android.sdk.auth.model.SignUpInResp;
 import com.minapp.android.sdk.file.*;
 import com.minapp.android.sdk.file.category.CategoryInfo;
 import com.minapp.android.sdk.file.category.CreateCategoryBody;
@@ -10,7 +13,6 @@ import com.minapp.android.sdk.file.model.FileMetaResponse;
 import com.minapp.android.sdk.file.model.UploadMetaBody;
 import com.minapp.android.sdk.file.model.UploadMetaResponse;
 import com.minapp.android.sdk.file.model.UploadResponse;
-import com.minapp.android.sdk.util.PagedList;
 import com.minapp.android.sdk.util.PagedListResponse;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -24,45 +26,40 @@ import java.util.Collection;
  */
 public interface HttpApi {
 
-    /**
-     * 登录认证相关 api
-     *
-     * 知晓云开放 API 授权通过 Access Token 作为接口调用的凭证，在对开放 API 发起请求时，均需要在 HTTP Header 加入以下授权参数：
-     * Authorization: Bearer <Access Token>
-     *
-     *                    授权流程
-     *
-     *   +--------+      ID/Secrct      +--------+
-     *   |        | +-----------------> |        |
-     *   |        |                     |        |
-     *   |        |         Code        |        |
-     *   |        | <-----------------+ |        |
-     *   | Client |                     | 知晓云  |
-     *   |        |         Code        |        |
-     *   |        | +-----------------> |        |
-     *   |        |                     |        |
-     *   |        |    Access Token     |        |
-     *   |        | <-----------------+ |        |
-     *   +--------+                     +--------+
-     *
-     */
+
+    /********************************* auth api ****************************************/
 
     /**
-     * 获取 code
+     * 通过邮箱注册
      * @param body
      * @return
      */
-    @POST("api/oauth2/hydrogen/openapi/authorize/")
-    Call<CodeResponse> code(@Body CodeRequest body);
-
+    @POST("hserve/v2.0/register/email/")
+    CheckedCall<SignUpInResp> signUpByEmail(@Body SignUpInByEmailReq body);
 
     /**
-     * 获取 access token
+     * 通过用户名注册
      * @param body
      * @return
      */
-    @POST("api/oauth2/access_token/")
-    Call<AccessTokenResponse> accessToken(@Body AccessTokenRequest body);
+    @POST("hserve/v2.0/register/username/")
+    CheckedCall<SignUpInResp> signUpByUsername(@Body SignUpInByUsernameReq body);
+
+    /**
+     * 邮箱登录
+     * @param body
+     * @return
+     */
+    @POST("hserve/v2.0/login/email/")
+    CheckedCall<SignUpInResp> signInByEmail(@Body SignUpInByEmailReq body);
+
+    /**
+     * 用户名登录
+     * @param body
+     * @return
+     */
+    @POST("hserve/v2.0/login/username/")
+    CheckedCall<SignUpInResp> signInByUsername(@Body SignUpInByUsernameReq body);
 
 
 
@@ -74,7 +71,7 @@ public interface HttpApi {
      * @param tableId
      * @return
      */
-    @POST("oserve/v1/table/{table_id}/record/")
+    @POST("hserve/v1/table/{table_id}/record/")
     CheckedCall<JsonObject> saveRecord(
             @Path("table_id") long tableId,
             @Body JsonObject body

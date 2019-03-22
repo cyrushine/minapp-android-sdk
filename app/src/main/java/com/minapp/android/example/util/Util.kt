@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 
 object Util {
 
@@ -26,6 +28,18 @@ object Util {
                 return false
         }
         return true
+    }
+
+    fun toastSuccess(ctx: Context) {
+        Toast.makeText(ctx, "操作成功", Toast.LENGTH_SHORT).show()
+    }
+
+    fun toastFailure(ctx: Context) {
+        Toast.makeText(ctx, "操作失败", Toast.LENGTH_SHORT).show()
+    }
+
+    fun hideSoftInput(activity: Activity) {
+        (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
     }
 
 }

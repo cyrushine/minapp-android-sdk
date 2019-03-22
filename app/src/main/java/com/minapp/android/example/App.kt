@@ -7,7 +7,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        Baas.init(Const.clientId, Const.clientSecret)
+        Baas.init(Const.clientId)
     }
 
 }

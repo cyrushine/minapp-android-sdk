@@ -12,14 +12,15 @@ import java.io.IOException;
 public class AuthInterceptor implements Interceptor {
     @Override
     public okhttp3.Response intercept(Chain chain) throws IOException {
-        String accessToken = Auth.accessToken();
-        Request request = chain.request();
-        if (accessToken != null) {
-            request = request
-                    .newBuilder()
-                    .addHeader(Const.AUTH_HEADER_KEY, Const.AUTH_HEADER_PREFIX + accessToken)
-                    .build();
+        Request.Builder builder = chain.request().newBuilder();
+        String clientId = Auth.clientId();
+        if (clientId != null) {
+            builder.header(Const.AUTH_HEADER_CLIENT_ID, clientId);
         }
-        return chain.proceed(request);
+        String token = Auth.token();
+        if (token != null) {
+            builder.header(Const.AUTH_HEADER_AUTH, Const.AUTH_HEADER_AUTH_PREFIX + token);
+        }
+        return chain.proceed(builder.build());
     }
 }

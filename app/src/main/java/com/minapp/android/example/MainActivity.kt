@@ -10,9 +10,11 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.minapp.android.example.auth.AuthActivity
 import com.minapp.android.example.model.SimpleModel
 import com.minapp.android.example.util.Glide4Engine
 import com.minapp.android.example.util.Util
+import com.minapp.android.sdk.auth.Auth
 import com.minapp.android.sdk.database.*
 import com.minapp.android.sdk.file.Storage
 import com.minapp.android.sdk.util.DateUtil
@@ -20,6 +22,7 @@ import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -40,16 +43,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Util.requestPermission(this, OPEN_IMAGE_PICKER, IMAGE_PICKER_PERMISSIONS)*/
 
             GlobalScope.launch { runCatching {
-
-                val table = TableObject(66683)
-                val record = table.createRecord()
-                    .put("horse_name", "扫马")
-                    .putStringArray("children", listOf("一", "二", "三", "四", "五", "六", "七"))
-                    .save()
-                table.fetchRecord(record.id()).let { it.getStringArray("children") }.also {
-                    Log.d(Const.TAG, it?.toString())
-                }
-                null
             }.onFailure { Log.e(Const.TAG, it.message, it) } }
         }
 
@@ -58,6 +51,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
+        bindButtons()
+    }
+
+    fun bindButtons() {
+        authBtn.setOnClickListener { startActivity(Intent(this, AuthActivity::class.java)) }
     }
 
     fun openImagePicker() {

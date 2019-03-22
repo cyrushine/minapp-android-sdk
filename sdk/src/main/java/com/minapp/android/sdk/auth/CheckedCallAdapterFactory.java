@@ -88,11 +88,8 @@ public class CheckedCallAdapterFactory extends CallAdapter.Factory {
          * @throws EmptyResponseException
          */
         private Response postProcess(Call call, Response response) throws IOException, HttpException, EmptyResponseException {
+            // TODO 自动重新登录？
             if (response.code() == 401) {
-                try {
-                    Auth.auth();
-                } catch (AuthException e) {}
-                response = call.clone().execute();
             }
 
             if (checked) {
